@@ -118,13 +118,14 @@ if it_is_correct(len(TARGET), start, TARGET) is False:
 
     score = 0
     best_generation_string = copies[0]
+
     while (score < len(TARGET) and generation < 200):
         copies = matrix_string_copies(best_generation_string, COPIES)
         new_strings = [0]*COPIES
         generation += 1
         j = 0
-        while j < len(copies):
 
+        while j < len(copies):
             new_strings[j] = replace_characters(copies[j])
             j += 1
 
@@ -132,6 +133,7 @@ if it_is_correct(len(TARGET), start, TARGET) is False:
         score = string_points(best_generation_string, TARGET)
         print(generation, ":", best_generation_string, "-- score:", score)
 
+# If the first string equals TARGET
 else:
     print("Today I will make a mega-sena game!!!")
     print("0:", TARGET, "-- score:", len(TARGET))
