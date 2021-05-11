@@ -3,10 +3,11 @@
 #include <time.h>
 #include <string.h>
 
-int const MAX_CHAR = 90;
-int const MIN_CHAR = 65;
-int const AMOUNT_COPIES = 100;
-const char * TARGET_ARRAY = "METHINKS IT IS LIKE A WEASEL";
+const int MAX_CHAR = 90;
+const int MIN_CHAR = 65;
+const int MAX_GENERATION = 200;
+const int AMOUNT_COPIES = 100;
+const char *TARGET_ARRAY = "METHINKS IT IS LIKE A WEASEL";
 
 
 /**
@@ -30,7 +31,7 @@ char generate_random_char();
  * @param array_size: int, Represents the size of the array
  * @return char * representing the array
  **/
-char * generate_random_array_char(int array_size);
+char *generate_random_array_char(int array_size);
 
 
 /**
@@ -38,7 +39,7 @@ char * generate_random_array_char(int array_size);
  * @param array_char: char, character to copy
  * @return array char copy
  **/
-char * copy_array_char(const char *array_char);
+char *copy_array_char(const char *array_char);
 
 
 /** 
@@ -47,7 +48,7 @@ char * copy_array_char(const char *array_char);
  * @param number_of_copies: int, Amout of copies 
  * @return A matrix of copies of param array
  **/
-char ** create_matrix_arrays_char(const char *array_char, int number_of_copies);
+char **create_matrix_arrays_char(const char *array_char, int number_of_copies);
 
 
 /**
@@ -63,7 +64,7 @@ int draw_with_probality_005();
  * @param array_char: const char *, array of char to replace somes chars
  * @return a array with replaced characters
  **/
-char * replace_chars(const char *array_char);
+char *replace_chars(const char *array_char);
 
 
 /**
@@ -77,11 +78,11 @@ int string_points(char *array_char, const char *array_target);
 
 /**
  * Find string with more numbers of points
- * @param matrix_copies: char *, a array of array of char
+ * @param matrix_copies: char **, a array of array of char
  * @param array_target: const char *, a array of char
  * @return the array more close of target
  **/
-char * best_string_so_far(char **matrix_copies, const char *array_target, int arry_size);
+char *best_string_so_far(char **matrix_copies, const char *array_target);
 
 
 /**
@@ -90,23 +91,42 @@ char * best_string_so_far(char **matrix_copies, const char *array_target, int ar
  * @param start_random_array: char *, initial random array of char
  * @param array_target: char *, array target 
  **/
-int it_is_correct(int size_target, char * start_random_array, char * array_target);
+int it_is_correct(int size_target, char *start_random_array, const char *array_target);
 
 
 int main() {
     srand(time(NULL)); 
-    char * random_initial_array = generate_random_array_char(strlen(TARGET_ARRAY));
-    char **matrix_copies = create_matrix_arrays_char(TARGET_ARRAY, AMOUNT_COPIES);
+    char *best_generation_array_char;
+    char *random_initial_array = generate_random_array_char(strlen(TARGET_ARRAY));
+    char **matrix_copies = create_matrix_arrays_char(random_initial_array, AMOUNT_COPIES);
+    char **new_matrix_char;
     int score = 0;
     int generation = 0;
+    int size_array;
 
     if (!it_is_correct(strlen(TARGET_ARRAY), random_initial_array, TARGET_ARRAY)) {
-        while (score < strlen(TARGET_ARRAY) && generation < 200) {
+        
+        best_generation_array_char = matrix_copies[0];
+        while (score < strlen(TARGET_ARRAY) && generation < MAX_GENERATION) {
             
+            generation ++;
+            matrix_copies = create_matrix_arrays_char(best_generation_array_char, AMOUNT_COPIES);
+            new_matrix_char = (char **) malloc(sizeof(char*) * AMOUNT_COPIES);
+
+            for (int i = 0; i < AMOUNT_COPIES; i++) {
+                size_array = strlen(matrix_copies[i]);
+                new_matrix_char[i] = (char *) malloc (sizeof(char) * size_array);
+                const char *tmp = matrix_copies[i];
+                strcpy(new_matrix_char[i], replace_chars(tmp));
+            }
+
+            best_generation_array_char = best_string_so_far(new_matrix_char, TARGET_ARRAY);
+            score = string_points(best_generation_array_char, TARGET_ARRAY);
+            printf("%i : %s -- score: %i\n", generation, best_generation_array_char, score);
         }
-         {
-            best_generation = matrix_copies[0]
-        }
+    } else {
+        printf("Today I will make a mega-sena game!!!\n");
+        printf("0: %s --score: %li\n", TARGET_ARRAY, strlen(TARGET_ARRAY));
     }
     return (0);
 }
@@ -127,8 +147,8 @@ char generate_random_char() {
 }
 
 
-char * generate_random_array_char(int array_size) {
-    char * random_array = (char*) malloc(array_size * sizeof(char));
+char *generate_random_array_char(int array_size) {
+    char *random_array = (char*) malloc(array_size * sizeof(char));
     int i = 0;
     while (i < array_size) {
         random_array[i] = generate_random_char();
@@ -138,17 +158,17 @@ char * generate_random_array_char(int array_size) {
 }
 
 
-char * copy_array_char(const char *array_char) {
+char *copy_array_char(const char *array_char) {
     int size_array = strlen(array_char);
-    char * array_copy = (char *) malloc(sizeof(char) * size_array);
+    char *array_copy = (char*) malloc(sizeof(char) * size_array);
     strcpy(array_copy, array_char);
     return array_copy;
 }
 
 
-char ** create_matrix_arrays_char(const char *array_char, int number_of_copies) {
+char **create_matrix_arrays_char(const char *array_char, int number_of_copies) {
     int size_array = strlen(array_char);
-    char ** matrix = (char **) malloc(sizeof(char*) * number_of_copies);
+    char **matrix = (char**) malloc(sizeof(char*) * number_of_copies);
     for (int i = 0; i < number_of_copies; i++) {
         matrix[i] = (char *) malloc (sizeof(char) * size_array);
         strcpy(matrix[i], array_char);
@@ -166,9 +186,9 @@ int draw_with_probality_005() {
 }
 
 
-char * replace_chars(const char *array_char) {
+char *replace_chars(const char *array_char) {
     int array_size = strlen(array_char);
-    char * new_array_char = (char *) malloc(sizeof(char) * array_size);
+    char *new_array_char = (char*) malloc(sizeof(char) *array_size);
     for (int i = 0; i < array_size; i++) {
         if (draw_with_probality_005())
             new_array_char[i] = generate_random_char();
@@ -188,25 +208,25 @@ int string_points(char *array_char, const char *array_target) {
 }
 
 
-char * best_string_so_far(char **matrix_copies, const char *array_target, int array_size) {
+char *best_string_so_far(char **matrix_copies, const char *array_target) {
     int i = 0;
     int score_a;
     int score_b;
-    char * best_string;
-    do {
-        best_string = matrix_copies[i];
+    char *best_string = matrix_copies[0];
+    
+    while (i < AMOUNT_COPIES) {
         score_a = string_points(matrix_copies[i], array_target);
         score_b = string_points(best_string, array_target);
         if (score_a > score_b) {
             best_string = matrix_copies[i];
         }
         i++;
-    } while (i < array_size);
+    }
     return best_string;
 }
 
 
-int it_is_correct(int size_target, char * start_random_array, char * array_target) {
+int it_is_correct(int size_target, char *start_random_array, const char *array_target) {
     if(string_points(start_random_array, array_target) == size_target) 
         return 1;
     else
